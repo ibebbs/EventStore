@@ -117,14 +117,6 @@
       <Project>{D42A5833-4F20-4FCC-B364-6207AE016732}</Project>
       <Name>EventStore.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EventStore.Transport.Http\EventStore.Transport.Http.csproj">
-      <Project>{30AF4820-DC60-4674-9E19-C4518445545A}</Project>
-      <Name>EventStore.Transport.Http</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EventStore.Transport.Tcp\EventStore.Transport.Tcp.csproj">
-      <Project>{A3C1CBE0-4728-451F-B709-480134432880}</Project>
-      <Name>EventStore.Transport.Tcp</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

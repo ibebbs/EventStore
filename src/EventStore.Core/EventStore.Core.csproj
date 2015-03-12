@@ -37,6 +37,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\EventStore.Rags.dll</HintPath>
     </Reference>
+    <Reference Include="EvHttpSharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\evhttpsharp\EvHttpSharp.dll</HintPath>
+    </Reference>
     <Reference Include="HdrHistogram.NET">
       <HintPath>..\libs\hdrhistogram\HdrHistogram.NET.dll</HintPath>
     </Reference>
@@ -319,6 +323,59 @@
     <Compile Include="TransactionLog\Unbuffered\NativeFile.cs" />
     <Compile Include="TransactionLog\Unbuffered\UnbufferedFileStream.cs" />
     <Compile Include="TransactionLog\Unbuffered\WinNative.cs" />
+    <Compile Include="Transport\Http\AsyncQueuedBufferWriter.cs" />
+    <Compile Include="Transport\Http\AsyncStreamCopier.cs" />
+    <Compile Include="Transport\Http\Atom\AtomExceptions.cs" />
+    <Compile Include="Transport\Http\Atom\AtomSpecs.cs" />
+    <Compile Include="Transport\Http\Atom\Feed.cs" />
+    <Compile Include="Transport\Http\Atom\ServiceDocument.cs" />
+    <Compile Include="Transport\Http\Client\ClientOperationState.cs" />
+    <Compile Include="Transport\Http\Client\HttpAsyncClient.cs" />
+    <Compile Include="Transport\Http\Client\IHttpClient.cs" />
+    <Compile Include="Transport\Http\Codecs\Codec.cs" />
+    <Compile Include="Transport\Http\Codecs\CustomCodec.cs" />
+    <Compile Include="Transport\Http\Codecs\JsonCodec.cs" />
+    <Compile Include="Transport\Http\Codecs\ManualEncoding.cs" />
+    <Compile Include="Transport\Http\Codecs\NoCodec.cs" />
+    <Compile Include="Transport\Http\Codecs\TextCodec.cs" />
+    <Compile Include="Transport\Http\Codecs\XmlCodec.cs" />
+    <Compile Include="Transport\Http\ContentType.cs" />
+    <Compile Include="Transport\Http\EntityManagement\HttpEntity.cs" />
+    <Compile Include="Transport\Http\EntityManagement\HttpEntityManager.cs" />
+    <Compile Include="Transport\Http\EntityManagement\HttpEntityManagerExtensions.cs" />
+    <Compile Include="Transport\Http\EntityManagement\ManagerOperationState.cs" />
+    <Compile Include="Transport\Http\EventStoreHttpRequest.cs" />
+    <Compile Include="Transport\Http\HttpMethod.cs" />
+    <Compile Include="Transport\Http\HttpResponse.cs" />
+    <Compile Include="Transport\Http\HttpStatusCode.cs" />
+    <Compile Include="Transport\Http\ICodec.cs" />
+    <Compile Include="Transport\Http\IOStreams.cs" />
+    <Compile Include="Transport\Http\MediaType.cs" />
+    <Compile Include="Transport\Http\ProxyHeaders.cs" />
+    <Compile Include="Transport\Http\Server\HttpAsyncServer.cs" />
+    <Compile Include="Transport\Http\WebRequestExtensions.cs" />
+    <Compile Include="Transport\Tcp\Formatting\FormatterBase.cs" />
+    <Compile Include="Transport\Tcp\Formatting\IMessageFormatter.cs" />
+    <Compile Include="Transport\Tcp\Formatting\ProtoBufMessageFormatter.cs" />
+    <Compile Include="Transport\Tcp\Formatting\RawMessageFormatter.cs" />
+    <Compile Include="Transport\Tcp\Framing\IMessageFramer.cs" />
+    <Compile Include="Transport\Tcp\Framing\LengthPrefixMessageFramer.cs" />
+    <Compile Include="Transport\Tcp\Framing\LengthPrefixMessageFramerWithBufferPool.cs" />
+    <Compile Include="Transport\Tcp\Framing\PackageFramingException.cs" />
+    <Compile Include="Transport\Tcp\Framing\StxEtxMessageFramer.cs" />
+    <Compile Include="Transport\Tcp\IMonitoredTcpConnection.cs" />
+    <Compile Include="Transport\Tcp\ITcpConnection.cs" />
+    <Compile Include="Transport\Tcp\SocketArgsPool.cs" />
+    <Compile Include="Transport\Tcp\TcpClientConnector.cs" />
+    <Compile Include="Transport\Tcp\TcpConfiguration.cs" />
+    <Compile Include="Transport\Tcp\TcpConnection.cs" />
+    <Compile Include="Transport\Tcp\TcpConnectionBase.cs" />
+    <Compile Include="Transport\Tcp\TcpConnectionLockless.cs" />
+    <Compile Include="Transport\Tcp\TcpConnectionMonitor.cs" />
+    <Compile Include="Transport\Tcp\TcpConnectionSsl.cs" />
+    <Compile Include="Transport\Tcp\TcpServerListener.cs" />
+    <Compile Include="Transport\Tcp\TcpStats.cs" />
+    <Compile Include="Transport\Tcp\TcpTypedConnection.cs" />
     <Compile Include="Util\FileUtil.cs" />
     <Compile Include="Util\HistogramExtensions.cs" />
     <Compile Include="Util\MD5Hash.cs" />
@@ -410,16 +467,7 @@
       <Project>{B4C9BE3D-43B1-4049-A23A-5DC53DB3F0B0}</Project>
       <Name>EventStore.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EventStore.Transport.Http\EventStore.Transport.Http.csproj">
-      <Project>{30AF4820-DC60-4674-9E19-C4518445545A}</Project>
-      <Name>EventStore.Transport.Http</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EventStore.Transport.Tcp\EventStore.Transport.Tcp.csproj">
-      <Project>{A3C1CBE0-4728-451F-B709-480134432880}</Project>
-      <Name>EventStore.Transport.Tcp</Name>
-    </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
