@@ -226,6 +226,24 @@ namespace EventStore.Projections.Core.Services.Management
                 projection.Handle(message);
                 _projections.Remove(message.Name);
                 _projectionsMap.Remove(projection.Id);
+                const string eventStreamId = "$projections-$all";
+                var corrId = Guid.NewGuid();
+                _writeDispatcher.Publish(
+                    new ClientMessage.WriteEvents(
+                        corrId,
+                        corrId,
+                        _writeDispatcher.Envelope,
+                        true,
+                        eventStreamId,
+                        ExpectedVersion.Any,
+                        new Event(
+                            Guid.NewGuid(),
+                            "$ProjectionDeleted",
+                            false,
+                            Helper.UTF8NoBom.GetBytes(message.Name),
+                            Empty.ByteArray),
+                        SystemAccount.Principal),
+                    m => { });
             }
         }
 
@@ -576,7 +594,7 @@ namespace EventStore.Projections.Core.Services.Management
                     .ToArray();
 
                 if (projectionRegistrations.IsNotEmpty())
-                    foreach (var @event in projectionRegistrations)
+                    foreach (var @event in grouped)
                     {
                         anyFound = true;
                         var projectionName = Helper.UTF8NoBom.GetString(@event.Event.Data);
