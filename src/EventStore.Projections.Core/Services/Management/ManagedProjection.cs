@@ -89,6 +89,9 @@ namespace EventStore.Projections.Core.Services.Management
 
         private readonly IPublisher _output;
 
+        private readonly RequestResponseDispatcher<ClientMessage.DeleteStream, ClientMessage.DeleteStreamCompleted>
+            _streamDispatcher;
+
         private readonly RequestResponseDispatcher<ClientMessage.WriteEvents, ClientMessage.WriteEventsCompleted>
             _writeDispatcher;
 
@@ -145,6 +148,7 @@ namespace EventStore.Projections.Core.Services.Management
             string name,
             bool enabledToRun,
             ILogger logger,
+            RequestResponseDispatcher<ClientMessage.DeleteStream, ClientMessage.DeleteStreamCompleted> streamDispatcher,
             RequestResponseDispatcher<ClientMessage.WriteEvents, ClientMessage.WriteEventsCompleted> writeDispatcher,
             RequestResponseDispatcher
                 <ClientMessage.ReadStreamEventsBackward, ClientMessage.ReadStreamEventsBackwardCompleted> readDispatcher,
@@ -171,6 +175,7 @@ namespace EventStore.Projections.Core.Services.Management
             _name = name;
             _enabledToRun = enabledToRun;
             _logger = logger ?? LogManager.GetLoggerFor<ManagedProjection>();
+            _streamDispatcher = streamDispatcher;
             _writeDispatcher = writeDispatcher;
             _readDispatcher = readDispatcher;
             _output = output;
@@ -454,6 +459,36 @@ namespace EventStore.Projections.Core.Services.Management
                 message.Envelope.ReplyWith(new ProjectionManagementMessage.OperationFailed("Cannot delete a projection that hasn't been stopped.")); 
             _lastAccessed = _timeProvider.Now;
             if (!ProjectionManagementMessage.RunAs.ValidateRunAs(Mode, ReadWrite.Write, _runAs, message)) return;
+            if (message.DeleteCheckpointStream)
+            {
+                //delete checkpoint stream
+                var correlationId = Guid.NewGuid();
+                var checkpointStreamName = new ProjectionNamesBuilder(message.Name, _persistedState.SourceDefinition).MakeCheckpointStreamName();
+                _streamDispatcher.Publish(new ClientMessage.DeleteStream(
+                    correlationId,
+                    correlationId,
+                    _writeDispatcher.Envelope,
+                    true,
+                    checkpointStreamName,
+                    ExpectedVersion.Any,
+                    true,
+                    SystemAccount.Principal), m => StreamDeleted(m, checkpointStreamName));
+            }
+            if (message.DeleteStateStream)
+            {
+                //delete state stream
+                var correlationId = Guid.NewGuid();
+                var resultStreamName = new ProjectionNamesBuilder(message.Name, _persistedState.SourceDefinition).GetResultStreamName();
+                _streamDispatcher.Publish(new ClientMessage.DeleteStream(
+                    correlationId,
+                    correlationId,
+                    _writeDispatcher.Envelope,
+                    true,
+                    resultStreamName,
+                    ExpectedVersion.Any,
+                    true,
+                    SystemAccount.Principal), m => StreamDeleted(m, resultStreamName));
+            }
             DoDelete();
             UpdateProjectionVersion();
             SetLastReplyEnvelope(message.Envelope);
@@ -715,6 +750,27 @@ namespace EventStore.Projections.Core.Services.Management
             {
                 _logger.Info("Retrying write projection source for {0}", _name);
                 BeginWrite();
+            }
+            else
+                throw new NotSupportedException("Unsupported error code received");
+        }
+
+        private void StreamDeleted(ClientMessage.DeleteStreamCompleted message, string eventStreamId)
+        {
+            if (message.Result == OperationResult.Success)
+            {
+                _logger.Info("projection stream '{0}' deleted", eventStreamId);
+                return;
+            }
+            _logger.Info(
+                "Projection stream '{0}' could not be deleted. Error: {1}",
+                eventStreamId,
+                Enum.GetName(typeof (OperationResult), message.Result));
+            if (message.Result == OperationResult.CommitTimeout || message.Result == OperationResult.ForwardTimeout
+                || message.Result == OperationResult.PrepareTimeout
+                || message.Result == OperationResult.WrongExpectedVersion)
+            {
+                //attempt to delete again?
             }
             else
                 throw new NotSupportedException("Unsupported error code received");

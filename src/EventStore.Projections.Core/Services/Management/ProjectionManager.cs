@@ -21,6 +21,7 @@ namespace EventStore.Projections.Core.Services.Management
             IHandle<SystemMessage.StateChangeMessage>,
             IHandle<ClientMessage.ReadStreamEventsBackwardCompleted>,
             IHandle<ClientMessage.WriteEventsCompleted>,
+            IHandle<ClientMessage.DeleteStreamCompleted>,
             IHandle<ProjectionManagementMessage.Command.Post>,
             IHandle<ProjectionManagementMessage.Command.UpdateQuery>,
             IHandle<ProjectionManagementMessage.Command.GetQuery>,
@@ -66,6 +67,9 @@ namespace EventStore.Projections.Core.Services.Management
 
         private readonly RequestResponseDispatcher<ClientMessage.WriteEvents, ClientMessage.WriteEventsCompleted>
             _writeDispatcher;
+
+        private readonly RequestResponseDispatcher<ClientMessage.DeleteStream, ClientMessage.DeleteStreamCompleted>
+            _streamDispatcher;
 
         private readonly
             RequestResponseDispatcher
@@ -122,7 +126,12 @@ namespace EventStore.Projections.Core.Services.Management
                     v => v.CorrelationId,
                     v => v.CorrelationId,
                     new PublishEnvelope(_inputQueue));
-
+            _streamDispatcher =
+                new RequestResponseDispatcher<ClientMessage.DeleteStream, ClientMessage.DeleteStreamCompleted>(
+                    publisher,
+                    v => v.CorrelationId,
+                    v => v.CorrelationId,
+                    new PublishEnvelope(_inputQueue));
 
             _projections = new Dictionary<string, ManagedProjection>();
             _projectionsMap = new Dictionary<Guid, string>();
@@ -489,6 +498,10 @@ namespace EventStore.Projections.Core.Services.Management
         public void Handle(ClientMessage.WriteEventsCompleted message)
         {
             _writeDispatcher.Handle(message);
+        }
+        public void Handle(ClientMessage.DeleteStreamCompleted message)
+        {
+            _streamDispatcher.Handle(message);
         }
 
         public void Handle(SystemMessage.StateChangeMessage message)
@@ -910,6 +923,7 @@ namespace EventStore.Projections.Core.Services.Management
                 name,
                 enabledToRun,
                 _logger,
+                _streamDispatcher,
                 _writeDispatcher,
                 _readDispatcher,
                 _publisher,
