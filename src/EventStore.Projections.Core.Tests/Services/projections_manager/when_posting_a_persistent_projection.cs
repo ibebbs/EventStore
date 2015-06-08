@@ -22,20 +22,18 @@ namespace EventStore.Projections.Core.Tests.Services.projections_manager
         {
             _projectionName = "test-projection";
             AllWritesQueueUp();
+            NoOtherStreams();
         }
 
         protected override IEnumerable<WhenStep> When()
         {
             yield return new SystemMessage.BecomeMaster(Guid.NewGuid());
-            AllWriteComplete();
-            _consumer.HandledMessages.Clear();
             yield return
                 new ProjectionManagementMessage.Command.Post(
                     new PublishEnvelope(_bus), ProjectionMode.Continuous, _projectionName,
                     ProjectionManagementMessage.RunAs.System, "JS", @"fromAll().whenAny(function(s,e){return s;});",
                     enabled: true, checkpointsEnabled: true, emitEnabled: true);
             OneWriteCompletes();
-            yield return Yield;
         }
 
         [Test, Category("v8")]
