@@ -740,9 +740,8 @@ namespace EventStore.Projections.Core.Services.Management
                 "Projection stream '{0}' could not be deleted. Error: {1}",
                 eventStreamId,
                 Enum.GetName(typeof (OperationResult), message.Result));
-            if (message.Result == OperationResult.CommitTimeout || message.Result == OperationResult.ForwardTimeout
-                || message.Result == OperationResult.PrepareTimeout
-                || message.Result == OperationResult.WrongExpectedVersion)
+            if (message.Result == OperationResult.CommitTimeout ||
+                message.Result == OperationResult.ForwardTimeout)
             {
                 DeleteCheckpointStream();
             }
