@@ -14,7 +14,7 @@ using NUnit.Framework;
 namespace EventStore.Projections.Core.Tests.Services.projections_manager
 {
     [TestFixture]
-    public class when_deleting_a_persistent_projection_and_keep_checkpoint_and_result_stream : TestFixtureWithProjectionCoreAndManagementServices
+    public class when_deleting_a_persistent_projection_and_keep_checkpoint_stream : TestFixtureWithProjectionCoreAndManagementServices
     {
         private string _projectionName;
         private const string _projectionStateStream = "$projections-test-projection-result";
@@ -56,17 +56,10 @@ namespace EventStore.Projections.Core.Tests.Services.projections_manager
         }
 
         [Test, Category("v8")]
-        public void should_have_attempted_to_delete_the_checkpoint_stream()
+        public void should_not_have_attempted_to_delete_the_checkpoint_stream()
         {
             Assert.IsFalse(
                 _consumer.HandledMessages.OfType<ClientMessage.DeleteStream>().Any(x=>x.EventStreamId == _projectionCheckpointStream));
-        }
-
-        [Test, Category("v8")]
-        public void should_have_attempted_to_delete_the_state_stream()
-        {
-            Assert.IsFalse(
-                _consumer.HandledMessages.OfType<ClientMessage.DeleteStream>().Any(x=>x.EventStreamId == _projectionStateStream));
         }
     }
 }

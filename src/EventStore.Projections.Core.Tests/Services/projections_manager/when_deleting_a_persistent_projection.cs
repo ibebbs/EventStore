@@ -17,7 +17,6 @@ namespace EventStore.Projections.Core.Tests.Services.projections_manager
     public class when_deleting_a_persistent_projection : TestFixtureWithProjectionCoreAndManagementServices
     {
         private string _projectionName;
-        private const string _projectionStateStream = "$projections-test-projection-result";
         private const string _projectionCheckpointStream = "$projections-test-projection-checkpoint";
 
         protected override void Given()
@@ -60,13 +59,6 @@ namespace EventStore.Projections.Core.Tests.Services.projections_manager
         {
             Assert.IsTrue(
                 _consumer.HandledMessages.OfType<ClientMessage.DeleteStream>().Any(x=>x.EventStreamId == _projectionCheckpointStream));
-        }
-
-        [Test, Category("v8")]
-        public void should_have_attempted_to_delete_the_state_stream()
-        {
-            Assert.IsTrue(
-                _consumer.HandledMessages.OfType<ClientMessage.DeleteStream>().Any(x=>x.EventStreamId == _projectionStateStream));
         }
     }
 }
