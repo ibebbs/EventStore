@@ -606,7 +606,7 @@ namespace EventStore.Projections.Core.Services.Management
                     .Where(x => x.Event != null)
                     .ToArray();
 
-                if (projectionRegistrations.IsNotEmpty())
+                if (grouped.IsNotEmpty())
                     foreach (var @event in grouped)
                     {
                         anyFound = true;
