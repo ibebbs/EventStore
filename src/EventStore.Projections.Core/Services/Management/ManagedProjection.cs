@@ -1040,7 +1040,7 @@ namespace EventStore.Projections.Core.Services.Management
                 true,
                 checkpointStreamName,
                 ExpectedVersion.Any,
-                true,
+                false,
                 SystemAccount.Principal), m => StreamDeleted(m, checkpointStreamName));
         }
 
